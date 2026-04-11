@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -68,22 +72,32 @@ fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEve
                 }
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                BannerImage(
-                    imageUrl = state.selectedRestaurant.imageUrl,
-                    name = state.selectedRestaurant.name,
-                    onClose = {
-                        coroutineScope.launch {
-                            sheetState.hide()
-                            onEvent(RestaurantsUiEvent.OnToggleSheet)
+                Box {
+                    BannerImage(
+                        imageUrl = state.selectedRestaurant.imageUrl,
+                        name = state.selectedRestaurant.name,
+                        onClose = {
+                            coroutineScope.launch {
+                                sheetState.hide()
+                                onEvent(RestaurantsUiEvent.OnToggleSheet)
+                            }
                         }
-                    }
-                )
-                Info(
-                    restaurant = state.selectedRestaurant,
-                    filterTags = state.filters
-                        .filter { it.id in state.selectedRestaurant.filterIds }
-                        .map { it.name }
-                )
+                    )
+
+                    InfoCard(
+                        restaurant = state.selectedRestaurant,
+                        filterTags = state.filters
+                            .filter { it.id in state.selectedRestaurant.filterIds }
+                            .map { it.name },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(horizontal = 16.dp)
+                            .offset(y = INFO_CARD_OFFSET)
+                    )
+
+                    // Compensates for the InfoCard offset so content below (if it would be added) is not hidden behind the card
+                    Spacer(modifier = Modifier.height(INFO_CARD_OFFSET))
+                }
             }
         }
     }
@@ -129,15 +143,27 @@ private fun BannerImage(
 }
 
 @Composable
-private fun Info(
+private fun InfoCard(
     restaurant: Restaurant,
-    filterTags: List<String>
+    filterTags: List<String>,
+    modifier: Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .height(INFO_CARD_HEIGHT)
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(12.dp),
+                ambientColor = Color(0x1A000000),
+                spotColor = Color(0x1A000000)
+            )
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(all = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
             text = restaurant.name,
@@ -164,7 +190,7 @@ private fun OpenStatus(isOpen: Boolean) {
 
     Text(
         text = statusText,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleLarge,
         color = if (isOpen) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
         modifier = Modifier.semantics {
             contentDescription = "Restaurant is currently $statusText"
@@ -183,3 +209,7 @@ private fun RestaurantDetailsSheetPreview() {
         RestaurantDetailsSheet(RestaurantsUiState()) {}
     }
 }
+
+
+private val INFO_CARD_HEIGHT = 144.dp
+private val INFO_CARD_OFFSET = INFO_CARD_HEIGHT / 2

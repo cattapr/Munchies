@@ -126,10 +126,10 @@ private fun StickyFilters(
     onEvent: (RestaurantsUiEvent) -> Unit
 ) {
     LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
             .padding(bottom = 22.dp)
             .semantics {
                 contentDescription = "Filter restaurants"
