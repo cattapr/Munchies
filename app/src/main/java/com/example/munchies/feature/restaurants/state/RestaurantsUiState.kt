@@ -9,10 +9,12 @@ data class RestaurantsUiState(
     val showBottomSheet: Boolean = false,
     val isLoading: Boolean = false,
     val hasError: Boolean = false,
+    val isRefreshing: Boolean = false,
     val restaurants: List<Restaurant> = emptyList(),
     val allRestaurants: List<Restaurant> = emptyList(),
     val filters: List<Filter> = emptyList(),
     val selectedFilterIds: Set<String> = emptySet(),
     val selectedRestaurant: Restaurant? = null,
-    val openStatus: OpenStatus? = null
+    val openStatus: OpenStatus? = null,
+    val openStatusHasError: Boolean = false
 )

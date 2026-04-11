@@ -16,7 +16,9 @@ import javax.inject.Inject
 @HiltViewModel
 class RestaurantsViewModel
 @Inject
-constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel() {
+constructor(
+    private val restaurantsUseCases: IRestaurantsUseCases,
+) : ViewModel() {
     private val _state = MutableStateFlow(RestaurantsUiState())
     val state = _state.asStateFlow()
 
@@ -26,6 +28,10 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
 
     fun onEvent(event: RestaurantsUiEvent) {
         when (event) {
+            RestaurantsUiEvent.OnRefresh -> {
+                loadRestaurants(isRefreshing = true)
+            }
+
             RestaurantsUiEvent.OnToggleSheet -> {
                 handleToggleSheet()
             }
@@ -41,22 +47,35 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
     }
 
 
-    private fun loadRestaurants() {
+    private fun loadRestaurants(isRefreshing: Boolean = false) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            if (isRefreshing) {
+                _state.update { it.copy(isRefreshing = true, hasError = false) }
+            } else {
+                _state.update { it.copy(isLoading = true, hasError = false) }
+            }
+
             restaurantsUseCases.getAllRestaurants().fold(
                 onSuccess = { restaurants ->
                     _state.update {
                         it.copy(
                             restaurants = restaurants,
                             allRestaurants = restaurants,
-                            hasError = false
+                            hasError = false,
+                            isLoading = false,
+                            isRefreshing = false
                         )
                     }
                     loadFilters(restaurants)
                 },
                 onFailure = {
-                    _state.update { it.copy(hasError = true, isLoading = false) }
+                    _state.update {
+                        it.copy(
+                            hasError = true,
+                            isLoading = false,
+                            isRefreshing = false
+                        )
+                    }
                 }
             )
         }
@@ -121,12 +140,14 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
 
     private fun loadOpenStatus(restaurantId: String) {
         viewModelScope.launch {
+            _state.update { it.copy(openStatusHasError = false) }
+
             restaurantsUseCases.getOpenStatus(restaurantId).fold(
                 onSuccess = { openStatus ->
                     _state.update { it.copy(openStatus = openStatus) }
                 },
                 onFailure = {
-//Maybe show toast with Failed to load open status?
+                    _state.update { it.copy(openStatusHasError = true) }
                 }
             )
         }

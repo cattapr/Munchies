@@ -33,7 +33,7 @@ import com.example.munchies.domain.model.Restaurant
 import com.example.munchies.feature.theme.ClockIconColor
 import com.example.munchies.feature.theme.RatingTextColor
 import com.example.munchies.feature.theme.StarIconColor
-import com.example.munchies.feature.theme.utils.cardShadow
+import com.example.munchies.feature.utils.cardShadow
 
 @Composable
 fun RestaurantCard(

@@ -1,4 +1,4 @@
-package com.example.munchies.feature.theme.utils
+package com.example.munchies.feature.utils
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
