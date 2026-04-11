@@ -7,7 +7,6 @@ import com.example.myapplication.domain.usecases.IRestaurantsUseCases
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -35,6 +34,15 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
 
             is RestaurantsUiEvent.OnFilterSelected -> {
                 handleOnFilterSelected(selectedId = event.filterId)
+            }
+
+            is RestaurantsUiEvent.OnRestaurantSelected -> {
+                _state.update {
+                    it.copy(
+                        selectedRestaurant = event.restaurant,
+                        showBottomSheet = true
+                    )
+                }
             }
         }
     }
@@ -95,10 +103,12 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
                 }
             }
 
-            _state.update { it.copy(
-                selectedFilterIds = newSelectedIds,
-                restaurants = filteredRestaurants
-            ) }
+            _state.update {
+                it.copy(
+                    selectedFilterIds = newSelectedIds,
+                    restaurants = filteredRestaurants
+                )
+            }
         }
     }
 }

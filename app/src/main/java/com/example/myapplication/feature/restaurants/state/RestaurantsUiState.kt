@@ -11,5 +11,6 @@ data class RestaurantsUiState(
     val restaurants: List<Restaurant> = emptyList(),
     val allRestaurants: List<Restaurant> = emptyList(),
     val filters: List<Filter> = emptyList(),
-    val selectedFilterIds: Set<String> = emptySet()
+    val selectedFilterIds: Set<String> = emptySet(),
+    val selectedRestaurant: Restaurant? = null
 )

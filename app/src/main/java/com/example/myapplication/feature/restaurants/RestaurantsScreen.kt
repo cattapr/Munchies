@@ -65,6 +65,7 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
                     RestaurantList(
                         restaurants = state.restaurants,
                         filters = state.filters,
+                        onEvent = onEvent
                     )
                 }
             }
@@ -77,7 +78,8 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
 private fun RestaurantList(
     restaurants: List<Restaurant>,
     modifier: Modifier = Modifier,
-    filters: List<Filter>
+    filters: List<Filter>,
+    onEvent: (RestaurantsUiEvent) -> Unit
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -92,7 +94,11 @@ private fun RestaurantList(
                 .filter { it.id in restaurant.filterIds }
                 .map { it.name }
 
-            RestaurantCard(restaurant, filterTags)
+            RestaurantCard(
+                restaurant = restaurant,
+                filterTags = filterTags,
+                onRestaurantClick = { onEvent(RestaurantsUiEvent.OnRestaurantSelected(restaurant)) }
+            )
         }
     }
 }

@@ -37,9 +37,10 @@ import com.example.myapplication.feature.theme.StarIconColor
 
 @Composable
 fun RestaurantCard(
+    modifier: Modifier = Modifier,
     restaurant: Restaurant,
     filterTags: List<String>,
-    modifier: Modifier = Modifier
+    onRestaurantClick: (Restaurant) -> Unit
 ) {
     Card(
         modifier = modifier
@@ -56,6 +57,7 @@ fun RestaurantCard(
                         "delivery time ${restaurant.deliveryTimeMinutes} minutes, " +
                         "filters: ${filterTags.joinToString(", ")}"
             },
+        onClick = { onRestaurantClick(restaurant) },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -141,7 +143,10 @@ private fun RestaurantTags(filterTags: List<String>) {
     Text(
         text = filterTags.joinToString(" · "),
         style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.semantics {
+            contentDescription = "Categories: ${filterTags.joinToString(", ")}"
+        }
     )
 }
 
