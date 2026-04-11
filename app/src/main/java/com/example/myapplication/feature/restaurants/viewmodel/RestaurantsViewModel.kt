@@ -78,19 +78,25 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
 
     private fun handleOnFilterSelected(selectedId: String) {
         viewModelScope.launch {
-            // Toggle off if same filter selected again
-            val newSelectedId = if (_state.value.selectedFilterId == selectedId) null else selectedId
+            val currentSelected = _state.value.selectedFilterIds
 
-            val filteredRestaurants = if (newSelectedId == null) {
+            // Toggle — add if not selected, remove if already selected
+            val newSelectedIds = if (selectedId in currentSelected) {
+                currentSelected - selectedId
+            } else {
+                currentSelected + selectedId
+            }
+
+            val filteredRestaurants = if (newSelectedIds.isEmpty()) {
                 _state.value.allRestaurants
             } else {
                 _state.value.allRestaurants.filter { restaurant ->
-                    newSelectedId in restaurant.filterIds
+                    newSelectedIds.all { it in restaurant.filterIds }
                 }
             }
 
             _state.update { it.copy(
-                selectedFilterId = newSelectedId,
+                selectedFilterIds = newSelectedIds,
                 restaurants = filteredRestaurants
             ) }
         }

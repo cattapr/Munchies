@@ -39,7 +39,7 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
         topBar = {
             RestaurantsTopBar(
                 filters = state.filters,
-                selectedFilterId = state.selectedFilterId,
+                selectedFilterIds = state.selectedFilterIds,
                 onEvent = onEvent
             )
         }
@@ -94,14 +94,14 @@ private fun RestaurantList(
 @Composable
 private fun RestaurantsTopBar(
     filters: List<Filter>,
-    selectedFilterId: String?,
+    selectedFilterIds: Set<String>,
     onEvent: (RestaurantsUiEvent) -> Unit
 ) {
     Column {
         Logo()
         StickyFilters(
             filters = filters,
-            selectedFilterId = selectedFilterId,
+            selectedFilterIds = selectedFilterIds,
             onEvent = onEvent
         )
     }
@@ -110,7 +110,7 @@ private fun RestaurantsTopBar(
 @Composable
 private fun StickyFilters(
     filters: List<Filter>,
-    selectedFilterId: String?,
+    selectedFilterIds: Set<String>,
     onEvent: (RestaurantsUiEvent) -> Unit
 ) {
     LazyRow(
@@ -123,7 +123,7 @@ private fun StickyFilters(
         items(filters) { filter ->
             FilterButton(
                 filter = filter,
-                isSelected = selectedFilterId == filter.id,
+                isSelected = filter.id in selectedFilterIds,
                 onClick = { onEvent(RestaurantsUiEvent.OnFilterSelected(filter.id)) }
             )
         }
