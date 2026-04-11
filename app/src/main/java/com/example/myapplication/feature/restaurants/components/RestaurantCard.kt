@@ -34,6 +34,7 @@ import com.example.myapplication.domain.model.Restaurant
 import com.example.myapplication.feature.theme.ClockIconColor
 import com.example.myapplication.feature.theme.RatingTextColor
 import com.example.myapplication.feature.theme.StarIconColor
+import com.example.myapplication.feature.theme.utils.cardShadow
 
 @Composable
 fun RestaurantCard(
@@ -42,15 +43,17 @@ fun RestaurantCard(
     filterTags: List<String>,
     onRestaurantClick: (Restaurant) -> Unit
 ) {
+    val cardShape = RoundedCornerShape(
+        topStart = 12.dp,
+        topEnd = 12.dp,
+        bottomStart = 0.dp,
+        bottomEnd = 0.dp
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(12.dp),
-                ambientColor = Color(0x1A000000),
-                spotColor = Color(0x1A000000)
-            )
+            .cardShadow(shape = cardShape)
             .semantics {
                 contentDescription = "${restaurant.name}, " +
                         "rated ${restaurant.rating}, " +
@@ -58,7 +61,7 @@ fun RestaurantCard(
                         "filters: ${filterTags.joinToString(", ")}"
             },
         onClick = { onRestaurantClick(restaurant) },
-        shape = RoundedCornerShape(12.dp),
+        shape = cardShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {

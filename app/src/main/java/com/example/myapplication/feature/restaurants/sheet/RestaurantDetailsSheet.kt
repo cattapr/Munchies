@@ -45,6 +45,7 @@ import com.example.myapplication.R
 import com.example.myapplication.domain.model.Restaurant
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
+import com.example.myapplication.feature.theme.utils.cardShadow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,16 +153,8 @@ private fun InfoCard(
         modifier = modifier
             .fillMaxWidth()
             .height(INFO_CARD_HEIGHT)
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(12.dp),
-                ambientColor = Color(0x1A000000),
-                spotColor = Color(0x1A000000)
-            )
-            .background(
-                color = Color.White,
-                shape = RoundedCornerShape(12.dp)
-            )
+            .cardShadow()
+            .background(Color.White)
             .padding(all = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
