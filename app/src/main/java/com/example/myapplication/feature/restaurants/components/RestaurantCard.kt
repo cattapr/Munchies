@@ -3,12 +3,10 @@ package com.example.myapplication.feature.restaurants.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -17,12 +15,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -47,7 +49,13 @@ fun RestaurantCard(
                 shape = RoundedCornerShape(12.dp),
                 ambientColor = Color(0x1A000000),
                 spotColor = Color(0x1A000000)
-            ),
+            )
+            .semantics {
+                contentDescription = "${restaurant.name}, " +
+                        "rated ${restaurant.rating}, " +
+                        "delivery time ${restaurant.deliveryTimeMinutes} minutes, " +
+                        "filters: ${filterTags.joinToString(", ")}"
+            },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -68,7 +76,7 @@ private fun RestaurantImage(imageUrl: String, name: String) {
             .build(),
         placeholder = painterResource(R.drawable.img_placeholder),
         error = painterResource(R.drawable.img_placeholder),
-        contentDescription = name,
+        contentDescription = "Image of $name",
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
@@ -78,11 +86,9 @@ private fun RestaurantImage(imageUrl: String, name: String) {
 
 @Composable
 private fun RestaurantInfo(restaurant: Restaurant, filterTags: List<String>) {
-    Column(modifier = Modifier.padding(12.dp)) {
+    Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         RestaurantTitleRow(restaurant = restaurant)
-        Spacer(modifier = Modifier.height(2.dp))
         RestaurantTags(filterTags)
-        Spacer(modifier = Modifier.height(2.dp))
         RestaurantDeliveryTime(deliveryTimeMinutes = restaurant.deliveryTimeMinutes)
     }
 }
@@ -103,21 +109,29 @@ private fun RestaurantTitleRow(restaurant: Restaurant) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun RestaurantRating(rating: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            contentDescription = "Rating: $rating out of 5"
+        }) {
         Icon(
             painter = painterResource(id = R.drawable.ic_star),
             contentDescription = null,
             tint = StarIconColor,
             modifier = Modifier.size(12.dp)
         )
-        Spacer(modifier = Modifier.width(3.dp))
         Text(
             text = rating,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = RatingTextColor
+            color = RatingTextColor,
+            modifier = Modifier.semantics {
+                invisibleToUser()
+            },
         )
     }
 }
@@ -129,23 +143,30 @@ private fun RestaurantTags(filterTags: List<String>) {
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.secondary
     )
-
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun RestaurantDeliveryTime(deliveryTimeMinutes: Int) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            contentDescription = "Delivery time: $deliveryTimeMinutes minutes"
+        }) {
         Icon(
             painter = painterResource(id = R.drawable.ic_clock),
             contentDescription = null,
             tint = ClockIconColor,
             modifier = Modifier.size(10.dp)
         )
-        Spacer(modifier = Modifier.width(3.dp))
         Text(
             text = "$deliveryTimeMinutes mins",
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.semantics {
+                invisibleToUser()
+            },
         )
     }
 }

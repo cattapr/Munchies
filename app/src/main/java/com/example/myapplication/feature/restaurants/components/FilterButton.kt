@@ -13,14 +13,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.myapplication.domain.model.Filter
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FilterButton(
     filter: Filter,
@@ -29,7 +37,8 @@ fun FilterButton(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.White
-    val textColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+    val textColor =
+        if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -38,12 +47,20 @@ fun FilterButton(
             .height(48.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(backgroundColor)
-            .clickable { onClick() }
+            .clickable(
+                onClick = onClick,
+                onClickLabel = if (isSelected) "Deselect ${filter.name}" else "Select ${filter.name}"
+            )
+            .semantics(mergeDescendants = true) {
+                contentDescription = filter.name
+                selected = isSelected
+                role = Role.Button
+            }
             .padding(end = 16.dp)
     ) {
         AsyncImage(
             model = filter.imageUrl,
-            contentDescription = filter.name,
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxHeight()
@@ -52,7 +69,10 @@ fun FilterButton(
         Text(
             text = filter.name,
             style = MaterialTheme.typography.titleMedium,
-            color = textColor
+            color = textColor,
+            modifier = Modifier.semantics {
+                invisibleToUser()
+            },
         )
     }
 }

@@ -21,6 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
@@ -42,7 +44,7 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
                 selectedFilterIds = state.selectedFilterIds,
                 onEvent = onEvent
             )
-        }
+        },
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -79,7 +81,11 @@ private fun RestaurantList(
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .semantics {
+                contentDescription = "${restaurants.size} restaurants available"
+            },
     ) {
         items(restaurants) { restaurant ->
             val filterTags = filters
@@ -119,6 +125,9 @@ private fun StickyFilters(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 22.dp)
+            .semantics {
+                contentDescription = "Filter restaurants"
+            }
     ) {
         items(filters) { filter ->
             FilterButton(
@@ -134,7 +143,7 @@ private fun StickyFilters(
 private fun Logo() {
     Icon(
         painter = painterResource(id = R.drawable.ic_logo),
-        contentDescription = "Logo",
+        contentDescription = "Umain logo",
         modifier = Modifier
             .padding(all = 16.dp)
     )
