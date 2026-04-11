@@ -3,7 +3,6 @@ package com.example.myapplication.data.model
 import com.google.gson.annotations.SerializedName
 
 data class RestaurantsResponse(
-    @SerializedName("restaurants")
     val restaurants: List<ApiRestaurant>
 )
 

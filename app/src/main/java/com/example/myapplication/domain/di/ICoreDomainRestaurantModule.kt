@@ -1,6 +1,8 @@
 package com.example.myapplication.domain.di
 
+import com.example.myapplication.domain.usecases.GetFilterUseCase
 import com.example.myapplication.domain.usecases.GetRestaurantsUseCase
+import com.example.myapplication.domain.usecases.IGetFilterUseCase
 import com.example.myapplication.domain.usecases.IGetRestaurantsUseCase
 import com.example.myapplication.domain.usecases.IRestaurantsUseCases
 import com.example.myapplication.domain.usecases.RestaurantsUseCases
@@ -17,10 +19,15 @@ interface ICoreDomainRestaurantModule {
     @Singleton
     fun bindRestaurantUseCases(restaurantsUseCase: RestaurantsUseCases): IRestaurantsUseCases
 
-
     @Binds
     @Singleton
     fun bindGetRestaurantsUseCase(
         getRestaurantsUseCase: GetRestaurantsUseCase
     ): IGetRestaurantsUseCase
+
+    @Binds
+    @Singleton
+    fun bindGetFilterUseCase(
+        getFilterUseCase: GetFilterUseCase
+    ): IGetFilterUseCase
 }

@@ -1,6 +1,10 @@
 package com.example.myapplication.feature.restaurants
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,16 +13,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.R
+import com.example.myapplication.domain.model.Filter
 import com.example.myapplication.domain.model.Restaurant
+import com.example.myapplication.feature.restaurants.components.FilterButton
 import com.example.myapplication.feature.restaurants.components.RestaurantCard
 import com.example.myapplication.feature.restaurants.sheet.RestaurantDetailsSheet
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
@@ -29,13 +37,36 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            RestaurantsTopBar()
+            RestaurantsTopBar(
+                filters = state.filters,
+                selectedFilterId = state.selectedFilterId,
+                onEvent = onEvent
+            )
         }
     ) { innerPadding ->
-        RestaurantList(
-            restaurants = state.restaurants,
-            modifier = Modifier.padding(innerPadding)
-        )
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+                .fillMaxSize()
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                AnimatedVisibility(
+                    visible = state.restaurants.isNotEmpty(),
+                    enter = fadeIn() + slideInVertically()
+                ) {
+                    RestaurantList(
+                        restaurants = state.restaurants,
+                        filters = state.filters,
+                    )
+                }
+            }
+        }
         RestaurantDetailsSheet(state, onEvent)
     }
 }
@@ -43,37 +74,59 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
 @Composable
 private fun RestaurantList(
     restaurants: List<Restaurant>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    filters: List<Filter>
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier.fillMaxSize()
     ) {
         items(restaurants) { restaurant ->
-            RestaurantCard(restaurant)
+            val filterTags = filters
+                .filter { it.id in restaurant.filterIds }
+                .map { it.name }
+
+            RestaurantCard(restaurant, filterTags)
         }
     }
 }
 
 @Composable
-private fun RestaurantsTopBar() {
+private fun RestaurantsTopBar(
+    filters: List<Filter>,
+    selectedFilterId: String?,
+    onEvent: (RestaurantsUiEvent) -> Unit
+) {
     Column {
         Logo()
-        StickyFilters()
+        StickyFilters(
+            filters = filters,
+            selectedFilterId = selectedFilterId,
+            onEvent = onEvent
+        )
     }
 }
 
 @Composable
-private fun StickyFilters() {
+private fun StickyFilters(
+    filters: List<Filter>,
+    selectedFilterId: String?,
+    onEvent: (RestaurantsUiEvent) -> Unit
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .padding(bottom = 22.dp)
     ) {
-        // TODO: filters goes here
+        items(filters) { filter ->
+            FilterButton(
+                filter = filter,
+                isSelected = selectedFilterId == filter.id,
+                onClick = { onEvent(RestaurantsUiEvent.OnFilterSelected(filter.id)) }
+            )
+        }
     }
 }
 

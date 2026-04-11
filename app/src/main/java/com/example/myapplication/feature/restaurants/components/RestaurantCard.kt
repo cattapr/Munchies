@@ -36,6 +36,7 @@ import com.example.myapplication.feature.theme.StarIconColor
 @Composable
 fun RestaurantCard(
     restaurant: Restaurant,
+    filterTags: List<String>,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -53,7 +54,7 @@ fun RestaurantCard(
     ) {
         Column {
             RestaurantImage(imageUrl = restaurant.imageUrl, name = restaurant.name)
-            RestaurantInfo(restaurant = restaurant)
+            RestaurantInfo(restaurant = restaurant, filterTags)
         }
     }
 }
@@ -76,11 +77,11 @@ private fun RestaurantImage(imageUrl: String, name: String) {
 }
 
 @Composable
-private fun RestaurantInfo(restaurant: Restaurant) {
+private fun RestaurantInfo(restaurant: Restaurant, filterTags: List<String>) {
     Column(modifier = Modifier.padding(12.dp)) {
         RestaurantTitleRow(restaurant = restaurant)
         Spacer(modifier = Modifier.height(2.dp))
-        RestaurantTags()
+        RestaurantTags(filterTags)
         Spacer(modifier = Modifier.height(2.dp))
         RestaurantDeliveryTime(deliveryTimeMinutes = restaurant.deliveryTimeMinutes)
     }
@@ -122,12 +123,13 @@ private fun RestaurantRating(rating: String) {
 }
 
 @Composable
-private fun RestaurantTags() {
+private fun RestaurantTags(filterTags: List<String>) {
     Text(
-        text = "Take out - Fast delivery - Eat in", // TODO: from filter endpoint
+        text = filterTags.joinToString(" · "),
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.secondary
     )
+
 }
 
 @Composable

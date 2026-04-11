@@ -20,4 +20,5 @@ interface ICoreDataRestaurantModule {
     @Binds
     @Singleton
     fun bindRestaurantsRepository(repository: RestaurantsRepository): IRestaurantsRepository
+
 }
