@@ -11,22 +11,21 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.myapplication.ui.delivery.DeliveryView
-import com.example.myapplication.ui.delivery.state.DeliveryUiState
-import com.example.myapplication.ui.delivery.viewmodel.DeliveryViewModel
-import com.example.myapplication.ui.theme.MyApplicationTheme
+import com.example.myapplication.feature.restaurants.RestaurantsScreen
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
+import com.example.myapplication.feature.restaurants.viewmodel.RestaurantsViewModel
+import com.example.myapplication.feature.theme.MyApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val deliveryViewModel: DeliveryViewModel by viewModels()
+    private val deliveryViewModel: RestaurantsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var deliveryUiState: DeliveryUiState by mutableStateOf(DeliveryUiState())
+        var deliveryUiState: RestaurantsUiState by mutableStateOf(RestaurantsUiState())
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyApplicationTheme {
-                DeliveryView(
+                RestaurantsScreen(
                     deliveryUiState,
                     deliveryViewModel::onEvent
                 )

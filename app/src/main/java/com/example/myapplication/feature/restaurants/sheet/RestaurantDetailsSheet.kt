@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.delivery.sheet
+package com.example.myapplication.feature.restaurants.sheet
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,19 +16,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.delivery.DeliveryUiEvent
-import com.example.myapplication.ui.delivery.state.DeliveryUiState
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryDetailsSheet(state: DeliveryUiState, onEvent: (DeliveryUiEvent) -> Unit) {
+fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (state.showBottomSheet) {
         ModalBottomSheet(
             containerColor = Color.White,
             contentColor = Color.Black,
-            onDismissRequest = { onEvent(DeliveryUiEvent.OnToggleSheet) },
+            onDismissRequest = { onEvent(RestaurantsUiEvent.OnToggleSheet) },
             sheetState = sheetState
         ) {
             Column(
@@ -49,11 +49,11 @@ fun DeliveryDetailsSheet(state: DeliveryUiState, onEvent: (DeliveryUiEvent) -> U
 
 @Preview(showBackground = true)
 @Composable
-private fun DeliveryDetailsSheetPreview() {
+private fun RestaurantDetailsSheetPreview() {
     Surface(
         color = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        DeliveryDetailsSheet(DeliveryUiState()) {}
+        RestaurantDetailsSheet(RestaurantsUiState()) {}
     }
 }

@@ -15,4 +15,5 @@ class RestaurantsRepository @Inject constructor(
             response.toUiRestaurant()
         }
     }
+
 }

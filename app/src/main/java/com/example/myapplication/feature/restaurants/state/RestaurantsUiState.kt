@@ -1,9 +1,9 @@
-package com.example.myapplication.ui.delivery.state
+package com.example.myapplication.feature.restaurants.state
 
 import com.example.myapplication.domain.model.Restaurant
 
 
-data class DeliveryUiState(
+data class RestaurantsUiState(
     val showBottomSheet: Boolean = false,
     val isLoading: Boolean = false,
     val hasError: Boolean = false,

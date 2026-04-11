@@ -1,10 +1,10 @@
-package com.example.myapplication.ui.delivery.viewmodel
+package com.example.myapplication.feature.restaurants.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.domain.usecases.IRestaurantsUseCases
-import com.example.myapplication.ui.delivery.DeliveryUiEvent
-import com.example.myapplication.ui.delivery.state.DeliveryUiState
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,18 +14,18 @@ import javax.inject.Inject
 import kotlin.fold
 
 @HiltViewModel
-class DeliveryViewModel
+class RestaurantsViewModel
 @Inject
 constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel() {
-    private val _state = MutableStateFlow(DeliveryUiState())
+    private val _state = MutableStateFlow(RestaurantsUiState())
     val state = _state.asStateFlow()
 
     init {
         loadRestaurants()
     }
-    fun onEvent(event: DeliveryUiEvent) {
+    fun onEvent(event: RestaurantsUiEvent) {
         when (event) {
-            DeliveryUiEvent.OnToggleSheet -> {
+            RestaurantsUiEvent.OnToggleSheet -> {
                 viewModelScope.launch {
                     _state.update { it.copy(showBottomSheet = !it.showBottomSheet) }
                 }

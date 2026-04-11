@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.delivery
+package com.example.myapplication.feature.restaurants
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,11 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.myapplication.ui.delivery.sheet.DeliveryDetailsSheet
-import com.example.myapplication.ui.delivery.state.DeliveryUiState
+import com.example.myapplication.feature.restaurants.sheet.RestaurantDetailsSheet
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
+import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
 
 @Composable
-fun DeliveryView(state: DeliveryUiState, onEvent: (DeliveryUiEvent) -> Unit) {
+fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -> Unit) {
     Scaffold(
         containerColor = Color.White,
     ) { innerPadding ->
@@ -32,13 +33,13 @@ fun DeliveryView(state: DeliveryUiState, onEvent: (DeliveryUiEvent) -> Unit) {
         }
 
 
-        DeliveryDetailsSheet(state, onEvent)
+        RestaurantDetailsSheet(state, onEvent)
     }
 }
 
 
 @Preview(showBackground = true)
 @Composable
-private fun DeliveryViewPreview() {
-    DeliveryView(state = DeliveryUiState()) {}
+private fun RestaurantsScreenPreview() {
+    RestaurantsScreen(state = RestaurantsUiState()) {}
 }
