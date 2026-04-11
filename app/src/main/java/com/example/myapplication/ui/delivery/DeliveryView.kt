@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +16,7 @@ import com.example.myapplication.ui.delivery.state.DeliveryUiState
 @Composable
 fun DeliveryView(state: DeliveryUiState, onEvent: (DeliveryUiEvent) -> Unit) {
     Scaffold(
-        containerColor = Color.Black,
+        containerColor = Color.White,
     ) { innerPadding ->
         Column(
             verticalArrangement = Arrangement.Center,
@@ -25,6 +26,9 @@ fun DeliveryView(state: DeliveryUiState, onEvent: (DeliveryUiEvent) -> Unit) {
         ) {
             // TODO: Filters
             // TODO: Restaurant cards
+            state.restaurants.forEach {
+                Text(it.name)
+            }
         }
 
 
