@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -145,7 +144,7 @@ private fun RestaurantRating(rating: String) {
 private fun RestaurantTags(filterTags: List<String>) {
     Text(
         text = filterTags.joinToString(" · "),
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.semantics {
             contentDescription = "Categories: ${filterTags.joinToString(", ")}"

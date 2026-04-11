@@ -27,9 +27,7 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
     fun onEvent(event: RestaurantsUiEvent) {
         when (event) {
             RestaurantsUiEvent.OnToggleSheet -> {
-                viewModelScope.launch {
-                    _state.update { it.copy(showBottomSheet = !it.showBottomSheet) }
-                }
+                handleToggleSheet()
             }
 
             is RestaurantsUiEvent.OnFilterSelected -> {
@@ -37,15 +35,11 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
             }
 
             is RestaurantsUiEvent.OnRestaurantSelected -> {
-                _state.update {
-                    it.copy(
-                        selectedRestaurant = event.restaurant,
-                        showBottomSheet = true
-                    )
-                }
+                handleOnRestaurantSelected(event.restaurant)
             }
         }
     }
+
 
     private fun loadRestaurants() {
         viewModelScope.launch {
@@ -111,4 +105,37 @@ constructor(private val restaurantsUseCases: IRestaurantsUseCases) : ViewModel()
             }
         }
     }
+
+    private fun handleOnRestaurantSelected(restaurant: Restaurant) {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    selectedRestaurant = restaurant,
+                    showBottomSheet = true,
+                    openStatus = null
+                )
+            }
+            loadOpenStatus(restaurant.id)
+        }
+    }
+
+    private fun loadOpenStatus(restaurantId: String) {
+        viewModelScope.launch {
+            restaurantsUseCases.getOpenStatus(restaurantId).fold(
+                onSuccess = { openStatus ->
+                    _state.update { it.copy(openStatus = openStatus) }
+                },
+                onFailure = {
+//Maybe show toast with Failed to load open status?
+                }
+            )
+        }
+    }
+
+    private fun handleToggleSheet() {
+        viewModelScope.launch {
+            _state.update { it.copy(showBottomSheet = !it.showBottomSheet) }
+        }
+    }
+
 }

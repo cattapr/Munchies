@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -39,9 +37,11 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.myapplication.R
+import com.example.myapplication.domain.model.OpenStatus
 import com.example.myapplication.domain.model.Restaurant
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiEvent
 import com.example.myapplication.feature.restaurants.state.RestaurantsUiState
@@ -90,6 +90,7 @@ fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEve
                         filterTags = state.filters
                             .filter { it.id in state.selectedRestaurant.filterIds }
                             .map { it.name },
+                        openStatus = state.openStatus,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .padding(horizontal = 16.dp)
@@ -147,6 +148,7 @@ private fun BannerImage(
 private fun InfoCard(
     restaurant: Restaurant,
     filterTags: List<String>,
+    openStatus: OpenStatus?,
     modifier: Modifier
 ) {
     Column(
@@ -165,28 +167,37 @@ private fun InfoCard(
                 heading()
             }
         )
-        Text(
-            text = filterTags.joinToString(" · "),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.semantics {
-                contentDescription = "Categories: ${filterTags.joinToString(", ")}"
-            }
-        )
-        OpenStatus(isOpen = true) // TODO: connect to /open/{id} endpoint
+        if (filterTags.isNotEmpty()) {
+            Text(
+                text = filterTags.joinToString(" · "),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.semantics {
+                    contentDescription = "Categories: ${filterTags.joinToString(", ")}"
+                }
+            )
+        }
+
+        OpenStatus(openStatus = openStatus)
     }
 }
 
 @Composable
-private fun OpenStatus(isOpen: Boolean) {
-    val statusText = if (isOpen) "Open" else "Closed"
+private fun OpenStatus(openStatus: OpenStatus?) {
+    if (openStatus == null) return
+
+    val text = if (openStatus.isCurrentlyOpen) "Open" else "Closed"
+    val color = if (openStatus.isCurrentlyOpen)
+        MaterialTheme.colorScheme.tertiary
+    else
+        MaterialTheme.colorScheme.error
 
     Text(
-        text = statusText,
+        text = text,
         style = MaterialTheme.typography.titleLarge,
-        color = if (isOpen) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
+        color = color,
         modifier = Modifier.semantics {
-            contentDescription = "Restaurant is currently $statusText"
+            contentDescription = "Restaurant is currently $text"
             liveRegion = LiveRegionMode.Polite
         }
     )

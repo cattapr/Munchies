@@ -1,6 +1,7 @@
 package com.example.myapplication.feature.restaurants.state
 
 import com.example.myapplication.domain.model.Filter
+import com.example.myapplication.domain.model.OpenStatus
 import com.example.myapplication.domain.model.Restaurant
 
 
@@ -12,5 +13,6 @@ data class RestaurantsUiState(
     val allRestaurants: List<Restaurant> = emptyList(),
     val filters: List<Filter> = emptyList(),
     val selectedFilterIds: Set<String> = emptySet(),
-    val selectedRestaurant: Restaurant? = null
+    val selectedRestaurant: Restaurant? = null,
+    val openStatus: OpenStatus? = null
 )

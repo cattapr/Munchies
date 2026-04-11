@@ -1,6 +1,7 @@
 package com.example.myapplication.data.remote
 
 import com.example.myapplication.data.model.FilterResponse
+import com.example.myapplication.data.model.OpenStatusResponse
 import com.example.myapplication.data.model.RestaurantsResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -12,4 +13,7 @@ interface RestaurantsApi {
 
     @GET("api/v1/filter/{id}")
     suspend fun getFilter(@Path("id") id: String): Response<FilterResponse>
+
+    @GET("api/v1/open/{id}")
+    suspend fun getOpenStatus(@Path("id") id: String): Response<OpenStatusResponse>
 }

@@ -35,8 +35,16 @@ val Typography = Typography(
         lineHeight = 20.sp,
         letterSpacing = 0.sp
     ),
-    // subtitle1 - Inter Bold 12sp
+    // subtitle
     labelLarge = TextStyle(
+        fontFamily = InterFont,
+        fontWeight = FontWeight.W700,
+        fontSize = 16.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.sp
+    ),
+
+    labelMedium = TextStyle(
         fontFamily = InterFont,
         fontWeight = FontWeight.W700,
         fontSize = 12.sp,
