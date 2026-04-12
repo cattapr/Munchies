@@ -1,5 +1,8 @@
 package com.example.munchies.feature.restaurants.sheet
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -225,7 +228,14 @@ private fun InfoCard(
             )
         }
 
-        OpenStatus(openStatus = openStatus)
+        AnimatedVisibility(
+            visible = openStatus != null,
+            enter = slideInVertically(
+                initialOffsetY = { it }
+            ) + fadeIn()
+        ) {
+            openStatus?.let { OpenStatus(openStatus = it) }
+        }
     }
 }
 
