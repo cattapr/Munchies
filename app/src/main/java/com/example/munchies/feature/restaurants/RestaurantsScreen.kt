@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,7 +46,9 @@ import com.example.munchies.feature.restaurants.sheet.RestaurantDetailsSheet
 import com.example.munchies.feature.restaurants.state.RestaurantsUiEvent
 import com.example.munchies.feature.restaurants.state.RestaurantsUiState
 import com.example.munchies.feature.utils.SnackbarService
+import com.example.munchies.feature.utils.smoothScrollToIndex
 import com.example.myapplication.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -177,21 +181,30 @@ private fun StickyFilters(
     selectedFilterIds: Set<String>,
     onEvent: (RestaurantsUiEvent) -> Unit
 ) {
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
     LazyRow(
+        state = listState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(bottom = 22.dp)
             .semantics {
-                contentDescription = "Filter restaurants"
+                contentDescription = "Filter restaurants by category"
             }
     ) {
-        items(filters) { filter ->
+        itemsIndexed(filters) { index, filter ->
             FilterButton(
                 filter = filter,
                 isSelected = filter.id in selectedFilterIds,
-                onClick = { onEvent(RestaurantsUiEvent.OnFilterSelected(filter.id)) }
+                onClick = {
+                    onEvent(RestaurantsUiEvent.OnFilterSelected(filter.id))
+                    coroutineScope.launch {
+                        listState.smoothScrollToIndex(index)
+                    }
+                }
             )
         }
     }
