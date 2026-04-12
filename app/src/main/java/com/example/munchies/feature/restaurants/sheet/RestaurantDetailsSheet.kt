@@ -279,14 +279,31 @@ private fun OpenStatus(openStatus: OpenStatus?) {
     )
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 private fun RestaurantDetailsSheetPreview() {
     Surface(
         color = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        RestaurantDetailsSheet(RestaurantsUiState(), effect = MutableSharedFlow()) {}
+        RestaurantDetailsSheet(
+            state = RestaurantsUiState(
+                contentState = RestaurantsContentState.Success(
+                    restaurants = listOf(
+                        Restaurant(
+                            id = "1",
+                            name = "Wayne's Burgers",
+                            rating = "4.5",
+                            filterIds = listOf("1", "2"),
+                            imageUrl = "",
+                            deliveryTimeMinutes = 30
+                        )
+                    ),
+                    allRestaurants = emptyList(),
+                    filters = emptyList()
+                )
+            ), effect = MutableSharedFlow()
+        ) {}
     }
 }
 

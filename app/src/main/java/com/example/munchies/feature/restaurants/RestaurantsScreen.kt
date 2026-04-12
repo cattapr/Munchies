@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.invisibleToUser
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.munchies.domain.model.Restaurant
 import com.example.munchies.feature.restaurants.layout.RestaurantList
 import com.example.munchies.feature.restaurants.layout.RestaurantsTopBar
 import com.example.munchies.feature.restaurants.sheet.RestaurantDetailsSheet
@@ -187,8 +188,27 @@ private fun SuccessContent(
 }
 
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun RestaurantsScreenPreview() {
-    RestaurantsScreen(state = RestaurantsUiState(), effect = MutableSharedFlow()) {}
+private fun RestaurantsScreenSuccessPreview() {
+    RestaurantsScreen(
+        state = RestaurantsUiState(
+            contentState = RestaurantsContentState.Success(
+                restaurants = listOf(
+                    Restaurant(
+                        id = "1",
+                        name = "Wayne's Burgers",
+                        rating = "4.5",
+                        filterIds = listOf("1", "2"),
+                        imageUrl = "",
+                        deliveryTimeMinutes = 30
+                    )
+                ),
+                allRestaurants = emptyList(),
+                filters = emptyList()
+            )
+        ),
+        effect = MutableSharedFlow(),
+        onEvent = {}
+    )
 }
