@@ -6,12 +6,12 @@ import javax.inject.Inject
 
 
 interface IGetOpenStatusUseCase {
-    suspend operator fun invoke(id: String): Result<OpenStatus>
+    suspend operator fun invoke(id: String, ignoreCache: Boolean = false): Result<OpenStatus>
 }
 
 class GetOpenStatusUseCase @Inject constructor(
     private val restaurantsRepository: IRestaurantsRepository
 ) : IGetOpenStatusUseCase {
-    override suspend fun invoke(id: String): Result<OpenStatus> =
-        restaurantsRepository.getOpenStatus(id)
+    override suspend fun invoke(id: String, ignoreCache: Boolean): Result<OpenStatus> =
+        restaurantsRepository.getOpenStatus(id, ignoreCache)
 }

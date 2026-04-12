@@ -66,10 +66,27 @@ fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEve
         SnackbarService(coroutineScope)
     }
 
+    LaunchedEffect(state.openStatus) {
+        if (state.openStatus != null) {
+            snackbarService.dismiss()
+        }
+    }
+
     LaunchedEffect(state.openStatusHasError) {
         if (state.openStatusHasError) {
+            val restaurantId = state.selectedRestaurant?.id
             snackbarService.show(
                 message = "We couldn't check if this restaurant is open right now. Please try again later.",
+                actionLabel = if (restaurantId != null) "Retry" else null,
+                onAction = {
+                    if (restaurantId != null) {
+                        onEvent(
+                            RestaurantsUiEvent.OnRetryLoadOpenStatus(
+                                restaurantId = restaurantId
+                            )
+                        )
+                    }
+                }
             )
         }
     }

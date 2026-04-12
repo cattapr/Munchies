@@ -6,8 +6,7 @@ import com.example.munchies.domain.model.Restaurant
 
 
 interface IRestaurantsRepository {
-    suspend fun getAllRestaurants(): Result<List<Restaurant>>
+    suspend fun getAllRestaurants(ignoreCache: Boolean = false): Result<List<Restaurant>>
     suspend fun getFilter(id: String): Result<Filter>
-    suspend fun getOpenStatus(id: String): Result<OpenStatus>
-
+    suspend fun getOpenStatus(id: String, ignoreCache: Boolean = false): Result<OpenStatus>
 }

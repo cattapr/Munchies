@@ -57,7 +57,7 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
             snackbarService.show(
                 message = "Something went wrong, please try again",
                 actionLabel = "Retry",
-                onAction = { onEvent(RestaurantsUiEvent.OnRefresh) }
+                onAction = { onEvent(RestaurantsUiEvent.OnRetry) }
             )
         }
     }

@@ -16,6 +16,12 @@ class SnackbarService(
     val snackbarHostState = SnackbarHostState()
     private val mutex = Mutex()
 
+    fun dismiss() {
+        coroutineScope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+        }
+    }
+
     fun show(
         message: String,
         actionLabel: String? = null,

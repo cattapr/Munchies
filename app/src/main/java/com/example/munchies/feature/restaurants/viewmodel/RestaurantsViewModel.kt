@@ -32,6 +32,10 @@ constructor(
                 loadRestaurants(isRefreshing = true)
             }
 
+            RestaurantsUiEvent.OnRetry -> {
+                loadRestaurants()
+            }
+
             RestaurantsUiEvent.OnToggleSheet -> {
                 handleToggleSheet()
             }
@@ -42,6 +46,10 @@ constructor(
 
             is RestaurantsUiEvent.OnRestaurantSelected -> {
                 handleOnRestaurantSelected(event.restaurant)
+            }
+
+            is RestaurantsUiEvent.OnRetryLoadOpenStatus -> {
+                loadOpenStatus(event.restaurantId, ignoreCache = true)
             }
         }
     }
@@ -55,7 +63,7 @@ constructor(
                 _state.update { it.copy(isLoading = true, hasError = false) }
             }
 
-            restaurantsUseCases.getAllRestaurants().fold(
+            restaurantsUseCases.getAllRestaurants(ignoreCache = isRefreshing).fold(
                 onSuccess = { restaurants ->
                     _state.update {
                         it.copy(
@@ -71,7 +79,7 @@ constructor(
                 onFailure = {
                     _state.update {
                         it.copy(
-                            hasError = true,
+                            hasError = !isRefreshing,
                             isLoading = false,
                             isRefreshing = false
                         )
@@ -138,13 +146,13 @@ constructor(
         }
     }
 
-    private fun loadOpenStatus(restaurantId: String) {
+    private fun loadOpenStatus(restaurantId: String, ignoreCache: Boolean = false) {
         viewModelScope.launch {
             _state.update { it.copy(openStatusHasError = false) }
 
-            restaurantsUseCases.getOpenStatus(restaurantId).fold(
+            restaurantsUseCases.getOpenStatus(restaurantId, ignoreCache).fold(
                 onSuccess = { openStatus ->
-                    _state.update { it.copy(openStatus = openStatus) }
+                    _state.update { it.copy(openStatus = openStatus, openStatusHasError = false) }
                 },
                 onFailure = {
                     _state.update { it.copy(openStatusHasError = true) }
