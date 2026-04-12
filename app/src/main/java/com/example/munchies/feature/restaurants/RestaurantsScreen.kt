@@ -5,9 +5,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +39,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.invisibleToUser
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -62,26 +67,11 @@ fun RestaurantsScreen(
     onEvent: (RestaurantsUiEvent) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val pullToRefreshState = rememberPullToRefreshState()
     val snackbarService = remember {
         SnackbarService(coroutineScope)
     }
 
-    LaunchedEffect(Unit) {
-        effect.collect { effect ->
-            when (effect) {
-                is RestaurantsUiEffect.ShowSnackbar -> {
-                    snackbarService.show(
-                        message = effect.message,
-                        actionLabel = effect.actionLabel,
-                        onAction = { onEvent(RestaurantsUiEvent.OnRetry) }
-                    )
-                }
-
-                else -> {}
-            }
-        }
-    }
+    CollectEffects(effect = effect, snackbarService = snackbarService, onEvent = onEvent)
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -98,61 +88,120 @@ fun RestaurantsScreen(
             SnackbarHost(hostState = snackbarService.snackbarHostState)
         },
     ) { innerPadding ->
-        PullToRefreshBox(
-            isRefreshing = state.isRefreshing,
-            onRefresh = { onEvent(RestaurantsUiEvent.OnRefresh) },
-            state = pullToRefreshState,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .semantics {
-                    customActions = listOf(
-                        CustomAccessibilityAction(
-                            label = "Refresh restaurants",
-                            action = {
-                                onEvent(RestaurantsUiEvent.OnRefresh)
-                                true
-                            }
-                        )
+        RestaurantsContent(
+            state = state,
+            effect = effect,
+            onEvent = onEvent,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+private fun CollectEffects(
+    effect: SharedFlow<RestaurantsUiEffect>,
+    snackbarService: SnackbarService,
+    onEvent: (RestaurantsUiEvent) -> Unit
+) {
+    LaunchedEffect(Unit) {
+        effect.collect { effect ->
+            when (effect) {
+                is RestaurantsUiEffect.ShowSnackbar -> {
+                    snackbarService.show(
+                        message = effect.message,
+                        actionLabel = effect.actionLabel,
+                        onAction = { onEvent(RestaurantsUiEvent.OnRetry) }
                     )
                 }
-        ) {
-            Box(
+
+                else -> {}
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RestaurantsContent(
+    state: RestaurantsUiState,
+    effect: SharedFlow<RestaurantsUiEffect>,
+    onEvent: (RestaurantsUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pullToRefreshState = rememberPullToRefreshState()
+
+    PullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = { onEvent(RestaurantsUiEvent.OnRefresh) },
+        state = pullToRefreshState,
+        indicator = {
+            PullToRefreshDefaults.Indicator(
+                state = pullToRefreshState,
+                isRefreshing = state.isRefreshing,
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxSize()
-            ) {
-                when (val contentState = state.contentState) {
-                    is RestaurantsContentState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .semantics { contentDescription = "Loading restaurants" },
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    is RestaurantsContentState.Success -> {
-                        AnimatedVisibility(
-                            visible = contentState.restaurants.isNotEmpty(),
-                            enter = fadeIn() + slideInVertically()
-                        ) {
-                            RestaurantList(
-                                restaurants = contentState.restaurants,
-                                filters = contentState.filters,
-                                onEvent = onEvent
-                            )
+                    .align(Alignment.TopCenter)
+                    .semantics { invisibleToUser() }
+            )
+        },
+        modifier = modifier
+            .fillMaxSize()
+            .semantics {
+                customActions = listOf(
+                    CustomAccessibilityAction(
+                        label = "Refresh restaurants",
+                        action = {
+                            onEvent(RestaurantsUiEvent.OnRefresh)
+                            true
                         }
-                    }
+                    )
+                )
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxSize()
+        ) {
+            when (val contentState = state.contentState) {
+                is RestaurantsContentState.Loading -> LoadingContent()
+                is RestaurantsContentState.Success -> SuccessContent(
+                    contentState = contentState,
+                    onEvent = onEvent
+                )
 
-                    is RestaurantsContentState.Error -> {
-                        // Error is handled by snackbar
-                        // But this could be an ErrorScreen for example
-                    }
+                is RestaurantsContentState.Error -> {
+                    // Error is handled by snackbar
                 }
             }
-            RestaurantDetailsSheet(state, effect, onEvent)
         }
+        RestaurantDetailsSheet(state, effect, onEvent)
+    }
+}
+
+@Composable
+private fun BoxScope.LoadingContent() {
+    CircularProgressIndicator(
+        modifier = Modifier
+            .align(Alignment.Center)
+            .semantics { contentDescription = "Loading restaurants" },
+        color = MaterialTheme.colorScheme.primary
+    )
+}
+
+@Composable
+private fun SuccessContent(
+    contentState: RestaurantsContentState.Success,
+    onEvent: (RestaurantsUiEvent) -> Unit
+) {
+    AnimatedVisibility(
+        visible = contentState.restaurants.isNotEmpty(),
+        enter = fadeIn() + slideInVertically()
+    ) {
+        RestaurantList(
+            restaurants = contentState.restaurants,
+            filters = contentState.filters,
+            onEvent = onEvent
+        )
     }
 }
 
@@ -182,6 +231,9 @@ private fun RestaurantList(
                 filterTags = filterTags,
                 onRestaurantClick = { onEvent(RestaurantsUiEvent.OnRestaurantSelected(restaurant)) }
             )
+        }
+        item {
+            Spacer(modifier.height(16.dp))
         }
     }
 }

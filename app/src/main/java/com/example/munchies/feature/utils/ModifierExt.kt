@@ -14,6 +14,6 @@ fun Modifier.cardShadow(
 ): Modifier = this.shadow(
     elevation = elevation,
     shape = shape,
-    ambientColor = Color.Black.copy(alpha = 0.1f),
-    spotColor = Color.Black.copy(alpha = 0.1f)
+    ambientColor = Color.Black.copy(alpha = 0.3f),
+    spotColor = Color.Black.copy(alpha = 0.3f)
 )
