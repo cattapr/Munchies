@@ -27,9 +27,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,7 +46,7 @@ import com.example.munchies.feature.restaurants.state.RestaurantsUiState
 import com.example.munchies.feature.utils.SnackbarService
 import com.example.myapplication.R
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
@@ -82,6 +85,17 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .semantics {
+                    customActions = listOf(
+                        CustomAccessibilityAction(
+                            label = "Refresh restaurants",
+                            action = {
+                                onEvent(RestaurantsUiEvent.OnRefresh)
+                                true
+                            }
+                        )
+                    )
+                }
         ) {
             Box(
                 modifier = Modifier
