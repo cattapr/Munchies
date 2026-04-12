@@ -138,8 +138,7 @@ constructor(
             _state.update {
                 it.copy(
                     selectedRestaurant = restaurant,
-                    showBottomSheet = true,
-                    openStatus = null
+                    showBottomSheet = true
                 )
             }
             loadOpenStatus(restaurant.id)
@@ -148,14 +147,12 @@ constructor(
 
     private fun loadOpenStatus(restaurantId: String, ignoreCache: Boolean = false) {
         viewModelScope.launch {
-            _state.update { it.copy(openStatusHasError = false) }
-
             restaurantsUseCases.getOpenStatus(restaurantId, ignoreCache).fold(
                 onSuccess = { openStatus ->
                     _state.update { it.copy(openStatus = openStatus, openStatusHasError = false) }
                 },
                 onFailure = {
-                    _state.update { it.copy(openStatusHasError = true) }
+                    _state.update { it.copy(openStatusHasError = true, openStatus = null) }
                 }
             )
         }
