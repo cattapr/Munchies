@@ -189,7 +189,7 @@ private fun BannerImage(
                 .build(),
             placeholder = painterResource(R.drawable.img_placeholder),
             error = painterResource(R.drawable.img_placeholder),
-            contentDescription = "Banner image of $name",
+            contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
