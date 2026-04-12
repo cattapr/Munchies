@@ -39,4 +39,4 @@ Both use `SharedFlow` effects emitted from the ViewModel so errors are only show
 
 ---
 
-Enjoy! 🎉
+Enjoy!
