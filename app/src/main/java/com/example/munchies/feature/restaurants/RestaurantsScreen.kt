@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -122,7 +122,7 @@ private fun RestaurantsContent(
                 isRefreshing = state.isRefreshing,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .semantics { invisibleToUser() }
+                    .semantics { hideFromAccessibility() }
             )
         },
         modifier = modifier

@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -79,7 +79,7 @@ fun FilterButton(
             style = MaterialTheme.typography.titleMedium,
             color = textColor,
             modifier = Modifier.semantics {
-                invisibleToUser()
+                hideFromAccessibility()
             },
         )
     }

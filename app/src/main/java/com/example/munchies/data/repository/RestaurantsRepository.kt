@@ -24,6 +24,9 @@ class RestaurantsRepository @Inject constructor(
             remoteDataSource.getAllRestaurants().map { it.toUiRestaurant() }
         }
     )
+    
+    private val filterCache = mutableMapOf<String, CachedResult<String, Filter>>()
+
     private val openStatusCaches = mutableMapOf<String, CachedResult<String, OpenStatus>>()
 
     override suspend fun getAllRestaurants(ignoreCache: Boolean): Result<List<Restaurant>> =
@@ -31,7 +34,15 @@ class RestaurantsRepository @Inject constructor(
 
 
     override suspend fun getFilter(id: String): Result<Filter> {
-        return remoteDataSource.getFilter(id).map { it.toUiFilter() }
+        val cache = filterCache.getOrPut(id) {
+            CachedResult(
+                coroutineScope = coroutineScope,
+                fetcher = { filterId ->
+                    remoteDataSource.getFilter(filterId).map { it.toUiFilter() }
+                }
+            )
+        }
+        return cache.fetch(key = id)
     }
 
     override suspend fun getOpenStatus(id: String, ignoreCache: Boolean): Result<OpenStatus> {

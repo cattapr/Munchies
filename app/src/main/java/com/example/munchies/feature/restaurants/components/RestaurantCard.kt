@@ -33,7 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -107,7 +107,7 @@ fun RestaurantCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .semantics { invisibleToUser() },
+                .semantics { hideFromAccessibility() },
             shape = cardShape,
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -183,7 +183,7 @@ private fun RestaurantRating(rating: String) {
             fontWeight = FontWeight.Bold,
             color = RatingTextColor,
             modifier = Modifier.semantics {
-                invisibleToUser()
+                hideFromAccessibility()
             },
         )
     }
@@ -221,7 +221,7 @@ private fun RestaurantDeliveryTime(deliveryTimeMinutes: Int) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.semantics {
-                invisibleToUser()
+                hideFromAccessibility()
             },
         )
     }
