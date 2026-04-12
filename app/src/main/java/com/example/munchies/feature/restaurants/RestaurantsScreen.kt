@@ -43,29 +43,43 @@ import com.example.munchies.domain.model.Restaurant
 import com.example.munchies.feature.restaurants.components.FilterButton
 import com.example.munchies.feature.restaurants.components.RestaurantCard
 import com.example.munchies.feature.restaurants.sheet.RestaurantDetailsSheet
+import com.example.munchies.feature.restaurants.state.RestaurantsContentState
+import com.example.munchies.feature.restaurants.state.RestaurantsUiEffect
 import com.example.munchies.feature.restaurants.state.RestaurantsUiEvent
 import com.example.munchies.feature.restaurants.state.RestaurantsUiState
 import com.example.munchies.feature.utils.SnackbarService
 import com.example.munchies.feature.utils.smoothScrollToIndex
 import com.example.myapplication.R
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -> Unit) {
+fun RestaurantsScreen(
+    state: RestaurantsUiState,
+    effect: SharedFlow<RestaurantsUiEffect>,
+    onEvent: (RestaurantsUiEvent) -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val pullToRefreshState = rememberPullToRefreshState()
     val snackbarService = remember {
         SnackbarService(coroutineScope)
     }
 
-    LaunchedEffect(state.hasError) {
-        if (state.hasError) {
-            snackbarService.show(
-                message = "Something went wrong, please try again",
-                actionLabel = "Retry",
-                onAction = { onEvent(RestaurantsUiEvent.OnRetry) }
-            )
+    LaunchedEffect(Unit) {
+        effect.collect { effect ->
+            when (effect) {
+                is RestaurantsUiEffect.ShowSnackbar -> {
+                    snackbarService.show(
+                        message = effect.message,
+                        actionLabel = effect.actionLabel,
+                        onAction = { onEvent(RestaurantsUiEvent.OnRetry) }
+                    )
+                }
+
+                else -> {}
+            }
         }
     }
 
@@ -73,7 +87,9 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             RestaurantsTopBar(
-                filters = state.filters,
+                filters = if (state.contentState is RestaurantsContentState.Success) {
+                    state.contentState.filters
+                } else emptyList(),
                 selectedFilterIds = state.selectedFilterIds,
                 onEvent = onEvent
             )
@@ -106,25 +122,36 @@ fun RestaurantsScreen(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -
                     .padding(horizontal = 16.dp)
                     .fillMaxSize()
             ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    AnimatedVisibility(
-                        visible = state.restaurants.isNotEmpty(),
-                        enter = fadeIn() + slideInVertically()
-                    ) {
-                        RestaurantList(
-                            restaurants = state.restaurants,
-                            filters = state.filters,
-                            onEvent = onEvent
+                when (val contentState = state.contentState) {
+                    is RestaurantsContentState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .semantics { contentDescription = "Loading restaurants" },
+                            color = MaterialTheme.colorScheme.primary
                         )
+                    }
+
+                    is RestaurantsContentState.Success -> {
+                        AnimatedVisibility(
+                            visible = contentState.restaurants.isNotEmpty(),
+                            enter = fadeIn() + slideInVertically()
+                        ) {
+                            RestaurantList(
+                                restaurants = contentState.restaurants,
+                                filters = contentState.filters,
+                                onEvent = onEvent
+                            )
+                        }
+                    }
+
+                    is RestaurantsContentState.Error -> {
+                        // Error is handled by snackbar
+                        // But this could be an ErrorScreen for example
                     }
                 }
             }
-            RestaurantDetailsSheet(state, onEvent)
+            RestaurantDetailsSheet(state, effect, onEvent)
         }
     }
 }
@@ -223,5 +250,5 @@ private fun Logo() {
 @Preview(showBackground = true)
 @Composable
 private fun RestaurantsScreenPreview() {
-    RestaurantsScreen(state = RestaurantsUiState()) {}
+    RestaurantsScreen(state = RestaurantsUiState(), effect = MutableSharedFlow()) {}
 }

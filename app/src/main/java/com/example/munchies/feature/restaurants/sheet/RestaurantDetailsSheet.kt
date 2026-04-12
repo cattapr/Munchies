@@ -50,16 +50,24 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.munchies.domain.model.OpenStatus
 import com.example.munchies.domain.model.Restaurant
+import com.example.munchies.feature.restaurants.state.RestaurantsContentState
+import com.example.munchies.feature.restaurants.state.RestaurantsUiEffect
 import com.example.munchies.feature.restaurants.state.RestaurantsUiEvent
 import com.example.munchies.feature.restaurants.state.RestaurantsUiState
 import com.example.munchies.feature.utils.SnackbarService
 import com.example.munchies.feature.utils.cardShadow
 import com.example.myapplication.R
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEvent) -> Unit) {
+fun RestaurantDetailsSheet(
+    state: RestaurantsUiState,
+    effect: SharedFlow<RestaurantsUiEffect>,
+    onEvent: (RestaurantsUiEvent) -> Unit
+) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -69,33 +77,40 @@ fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEve
         SnackbarService(coroutineScope)
     }
 
-    LaunchedEffect(state.openStatus) {
-        if (state.openStatus != null) {
+    LaunchedEffect(state.selectedRestaurantState?.openStatus) {
+        if (state.selectedRestaurantState?.openStatus != null) {
             snackbarService.dismiss()
         }
     }
 
-    LaunchedEffect(state.openStatusHasError) {
-        if (state.openStatusHasError) {
-            val restaurantId = state.selectedRestaurant?.id
-            snackbarService.show(
-                message = "We couldn't check if this restaurant is open right now. Please try again later.",
-                actionLabel = if (restaurantId != null) "Retry" else null,
-                onAction = {
-                    if (restaurantId != null) {
-                        onEvent(
-                            RestaurantsUiEvent.OnRetryLoadOpenStatus(
-                                restaurantId = restaurantId
+    LaunchedEffect(Unit) {
+        effect.collect { effect ->
+            when (effect) {
+                is RestaurantsUiEffect.ShowSheetSnackbar -> {
+                    snackbarService.show(
+                        message = effect.message,
+                        actionLabel = effect.actionLabel,
+                        onAction = {
+                            onEvent(
+                                RestaurantsUiEvent.OnRetryLoadOpenStatus(
+                                    restaurantId = effect.restaurantId
+                                )
                             )
-                        )
-                    }
+                        }
+                    )
                 }
-            )
+
+                else -> {}
+            }
         }
     }
 
 
-    if (state.showBottomSheet && state.selectedRestaurant != null) {
+    if (state.showBottomSheet && state.selectedRestaurantState?.restaurant != null) {
+        val selectedRestaurantState = state.selectedRestaurantState
+        val restaurant = selectedRestaurantState.restaurant
+        val openStatus = selectedRestaurantState.openStatus
+
         ModalBottomSheet(
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground,
@@ -108,15 +123,15 @@ fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEve
             modifier = Modifier
                 .fillMaxHeight()
                 .semantics {
-                    contentDescription = "${state.selectedRestaurant.name} details"
+                    contentDescription = "${restaurant.name} details"
                 }
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Box {
                         BannerImage(
-                            imageUrl = state.selectedRestaurant.imageUrl,
-                            name = state.selectedRestaurant.name,
+                            imageUrl = restaurant.imageUrl,
+                            name = restaurant.name,
                             onClose = {
                                 coroutineScope.launch {
                                     sheetState.hide()
@@ -126,11 +141,15 @@ fun RestaurantDetailsSheet(state: RestaurantsUiState, onEvent: (RestaurantsUiEve
                         )
 
                         InfoCard(
-                            restaurant = state.selectedRestaurant,
-                            filterTags = state.filters
-                                .filter { it.id in state.selectedRestaurant.filterIds }
-                                .map { it.name },
-                            openStatus = state.openStatus,
+                            restaurant = restaurant,
+                            filterTags = when (val contentState = state.contentState) {
+                                is RestaurantsContentState.Success -> contentState.filters
+                                    .filter { it.id in restaurant.filterIds }
+                                    .map { it.name }
+
+                                else -> emptyList()
+                            },
+                            openStatus = openStatus,
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
                                 .padding(horizontal = 16.dp)
@@ -267,7 +286,7 @@ private fun RestaurantDetailsSheetPreview() {
         color = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground
     ) {
-        RestaurantDetailsSheet(RestaurantsUiState()) {}
+        RestaurantDetailsSheet(RestaurantsUiState(), effect = MutableSharedFlow()) {}
     }
 }
 

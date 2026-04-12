@@ -4,10 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.munchies.domain.model.Restaurant
 import com.example.munchies.domain.usecases.IRestaurantsUseCases
+import com.example.munchies.feature.restaurants.state.RestaurantsContentState
+import com.example.munchies.feature.restaurants.state.RestaurantsUiEffect
 import com.example.munchies.feature.restaurants.state.RestaurantsUiEvent
 import com.example.munchies.feature.restaurants.state.RestaurantsUiState
+import com.example.munchies.feature.restaurants.state.SelectedRestaurantState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -21,6 +26,9 @@ constructor(
 ) : ViewModel() {
     private val _state = MutableStateFlow(RestaurantsUiState())
     val state = _state.asStateFlow()
+    private val _effect = MutableSharedFlow<RestaurantsUiEffect>()
+    val effect = _effect.asSharedFlow()
+
 
     init {
         loadRestaurants()
@@ -57,31 +65,30 @@ constructor(
 
     private fun loadRestaurants(isRefreshing: Boolean = false) {
         viewModelScope.launch {
-            if (isRefreshing) {
-                _state.update { it.copy(isRefreshing = true, hasError = false) }
-            } else {
-                _state.update { it.copy(isLoading = true, hasError = false) }
+            _state.update {
+                it.copy(
+                    isRefreshing = isRefreshing,
+                    contentState = if (isRefreshing) it.contentState else RestaurantsContentState.Loading
+                )
             }
 
             restaurantsUseCases.getAllRestaurants(ignoreCache = isRefreshing).fold(
                 onSuccess = { restaurants ->
-                    _state.update {
-                        it.copy(
-                            restaurants = restaurants,
-                            allRestaurants = restaurants,
-                            hasError = false,
-                            isLoading = false,
-                            isRefreshing = false
-                        )
-                    }
                     loadFilters(restaurants)
                 },
                 onFailure = {
                     _state.update {
                         it.copy(
-                            hasError = !isRefreshing,
-                            isLoading = false,
-                            isRefreshing = false
+                            isRefreshing = false,
+                            contentState = if (isRefreshing) it.contentState else RestaurantsContentState.Error
+                        )
+                    }
+                    viewModelScope.launch {
+                        _effect.emit(
+                            RestaurantsUiEffect.ShowSnackbar(
+                                message = "Something went wrong, please try again",
+                                actionLabel = "Retry"
+                            )
                         )
                     }
                 }
@@ -91,35 +98,42 @@ constructor(
 
     private fun loadFilters(restaurants: List<Restaurant>) {
         viewModelScope.launch {
-            // Collect unique filter IDs across all restaurants
             val uniqueFilterIds = restaurants
                 .flatMap { it.filterIds }
                 .toSet()
 
-            // Fetch each unique filter
             val filters = uniqueFilterIds.mapNotNull { filterId ->
                 restaurantsUseCases.getFilter(filterId).getOrNull()
             }
 
-            _state.update { it.copy(filters = filters, isLoading = false) }
+            _state.update {
+                it.copy(
+                    isRefreshing = false,
+                    contentState = RestaurantsContentState.Success(
+                        restaurants = restaurants,
+                        allRestaurants = restaurants,
+                        filters = filters
+                    )
+                )
+            }
         }
     }
 
     private fun handleOnFilterSelected(selectedId: String) {
         viewModelScope.launch {
-            val currentSelected = _state.value.selectedFilterIds
+            val currentState = _state.value.contentState
+            if (currentState !is RestaurantsContentState.Success) return@launch
 
-            // Toggle — add if not selected, remove if already selected
-            val newSelectedIds = if (selectedId in currentSelected) {
-                currentSelected - selectedId
+            val newSelectedIds = if (selectedId in _state.value.selectedFilterIds) {
+                _state.value.selectedFilterIds - selectedId
             } else {
-                currentSelected + selectedId
+                _state.value.selectedFilterIds + selectedId
             }
 
             val filteredRestaurants = if (newSelectedIds.isEmpty()) {
-                _state.value.allRestaurants
+                currentState.allRestaurants
             } else {
-                _state.value.allRestaurants.filter { restaurant ->
+                currentState.allRestaurants.filter { restaurant ->
                     newSelectedIds.all { it in restaurant.filterIds }
                 }
             }
@@ -127,7 +141,7 @@ constructor(
             _state.update {
                 it.copy(
                     selectedFilterIds = newSelectedIds,
-                    restaurants = filteredRestaurants
+                    contentState = currentState.copy(restaurants = filteredRestaurants)
                 )
             }
         }
@@ -137,8 +151,8 @@ constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    selectedRestaurant = restaurant,
-                    showBottomSheet = true
+                    showBottomSheet = true,
+                    selectedRestaurantState = SelectedRestaurantState(restaurant = restaurant)
                 )
             }
             loadOpenStatus(restaurant.id)
@@ -149,10 +163,34 @@ constructor(
         viewModelScope.launch {
             restaurantsUseCases.getOpenStatus(restaurantId, ignoreCache).fold(
                 onSuccess = { openStatus ->
-                    _state.update { it.copy(openStatus = openStatus, openStatusHasError = false) }
+                    _state.update {
+                        it.copy(
+                            selectedRestaurantState = it.selectedRestaurantState?.copy(
+                                openStatus = openStatus,
+                                openStatusHasError = false
+                            )
+                        )
+                    }
                 },
                 onFailure = {
-                    _state.update { it.copy(openStatusHasError = true, openStatus = null) }
+                    _state.update {
+                        it.copy(
+                            selectedRestaurantState = it.selectedRestaurantState?.copy(
+                                openStatus = null,
+                                openStatusHasError = true
+                            )
+                        )
+                    }
+
+                    viewModelScope.launch {
+                        _effect.emit(
+                            RestaurantsUiEffect.ShowSheetSnackbar(
+                                message = "We couldn't check if this restaurant is open right now. Please try again later.",
+                                actionLabel = "Retry",
+                                restaurantId = restaurantId
+                            )
+                        )
+                    }
                 }
             )
         }

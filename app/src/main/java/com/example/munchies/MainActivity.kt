@@ -45,8 +45,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             MunchiesApplicationTheme {
                 RestaurantsScreen(
-                    deliveryUiState,
-                    deliveryViewModel::onEvent
+                    state = deliveryUiState,
+                    effect = deliveryViewModel.effect,
+                    onEvent = deliveryViewModel::onEvent
                 )
             }
         }
