@@ -27,6 +27,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.munchies.domain.model.Filter
+import com.example.munchies.feature.theme.MunchiesShadow
+import com.example.munchies.feature.utils.dropShadow
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -40,12 +42,18 @@ fun FilterButton(
     val textColor =
         if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
 
+    val shape = RoundedCornerShape(24.dp)
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier
             .height(48.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .dropShadow(
+                shadows = MunchiesShadow.filterButton,
+                shape = shape
+            )
+            .clip(shape)
             .background(backgroundColor)
             .clickable(
                 onClick = onClick,

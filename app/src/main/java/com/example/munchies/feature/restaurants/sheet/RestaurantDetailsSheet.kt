@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
@@ -54,8 +56,9 @@ import com.example.munchies.feature.restaurants.state.RestaurantsContentState
 import com.example.munchies.feature.restaurants.state.RestaurantsUiEffect
 import com.example.munchies.feature.restaurants.state.RestaurantsUiEvent
 import com.example.munchies.feature.restaurants.state.RestaurantsUiState
+import com.example.munchies.feature.theme.MunchiesShadow
 import com.example.munchies.feature.utils.SnackbarService
-import com.example.munchies.feature.utils.cardShadow
+import com.example.munchies.feature.utils.dropShadow
 import com.example.myapplication.R
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -224,7 +227,11 @@ private fun InfoCard(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = INFO_CARD_HEIGHT)
-            .cardShadow()
+            .dropShadow(
+                shadows = MunchiesShadow.card,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
             .padding(all = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

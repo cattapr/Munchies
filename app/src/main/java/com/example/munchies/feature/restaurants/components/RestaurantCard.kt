@@ -43,9 +43,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.munchies.domain.model.Restaurant
 import com.example.munchies.feature.theme.ClockIconColor
+import com.example.munchies.feature.theme.MunchiesShadow
 import com.example.munchies.feature.theme.RatingTextColor
 import com.example.munchies.feature.theme.StarIconColor
-import com.example.munchies.feature.utils.cardShadow
+import com.example.munchies.feature.utils.dropShadow
 import com.example.myapplication.R
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -80,7 +81,10 @@ fun RestaurantCard(
             .fillMaxWidth()
             .scale(scale)
             .then(
-                if (!pressed) Modifier.cardShadow(shape = cardShape)
+                if (!pressed) Modifier.dropShadow(
+                    shadows = MunchiesShadow.card,
+                    shape = cardShape
+                )
                 else Modifier
             )
             .clickable(
